@@ -2,24 +2,31 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_MPU6050.h>
+#include <Keypad.h>
+
+const byte ROWS = 4;
+const byte COLS = 1;
+const byte ROW_PINS[ROWS] = { 8, 9, 6, 7 };
+const byte COL_PINS[COLS] = {1};
+char keys[ROWS][COLS] = { '1', '2', '3', '4' };
+Keypad keypad = Keypad(makeKeymap(keys), ROW_PINS, COL_PINS, ROWS, COLS);
 
 
 dht DHT;
 Adafruit_MPU6050 mpu;
 
 #define DHT11_PIN 2
-#define IN1_PIN 4 // DRV8833 in1 pin
-#define IN2_PIN 5 // DRV8833 in2 pin
+#define IN1_PIN 4 
+#define IN2_PIN 5 
 
 
-const int fanOnTemp = 37; // Temperature to turn on fan
-const int fanOffTemp = 34; // Temperature to turn off fan
-const float Kp = 5; // Proportional gain for PID
-const float Ki = 0.1; // Integral gain for PID
-const float Kd = 0.5; // Derivative gain for PID
-const int setpoint = 36; // Desired temperature in degrees Celsius
+const int fanOnTemp = 18; 
+const int fanOffTemp = 34; 
+const float Kp = 5; 
+const float Ki = 0.1; 
+const float Kd = 0.5; 
+const int setpoint = 36; 
 
-// PID variables
 int previousError = 0;
 float integral = 0;
 
@@ -40,6 +47,13 @@ void setup(){
 }
 
 void loop(){
+
+  char key = keypad.getKey();
+  if (key != NO_KEY){
+    Serial.write(key);
+  }
+  
+  {
   int chk = DHT.read11(DHT11_PIN);
   float temperature = DHT.temperature;
   Serial.print("Temperature = ");
@@ -48,6 +62,7 @@ void loop(){
   Serial.println(DHT.humidity);
   Serial.println(" ");
   delay(1000);
+  
 
   int error = setpoint - temperature;
   integral += error;
@@ -71,11 +86,12 @@ void loop(){
     digitalWrite(IN1_PIN, LOW);
     digitalWrite(IN2_PIN, LOW);
   }
-
+  }
+  
+  {
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  /* Print out the values */
   Serial.print("Acceleration X: ");
   Serial.print(a.acceleration.x);
   Serial.print(", Y: ");
@@ -94,10 +110,11 @@ void loop(){
 
   Serial.println("");
   delay(100);
+  
 
-
-  if (a.acceleration.x = 0.23, a.acceleration.y = 0.05 ){ 
-    digitalWrite(IN1_PIN, LOW);
-    digitalWrite(IN2_PIN, LOW);
+  if ( a.acceleration.x = 0.23, a.acceleration.y = 0.05){
+      digitalWrite(IN1_PIN, LOW);
+      digitalWrite(IN2_PIN, LOW);
+    }
   }
 }
